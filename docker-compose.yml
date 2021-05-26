@@ -1,0 +1,103 @@
+#version: '3'
+#
+#services:
+#
+# docker-mysql:
+#
+#    restart: always
+#
+#    container_name: docker-vi-mysql
+#
+#    image: mysql
+#    
+#    platform: linux/amd64
+#    
+#
+#    environment:
+#
+#      MYSQL_DATABASE: db
+#      
+#      MYSQL_ROOT_PASSWORD: urvsql123
+#
+#      MYSQL_ROOT_HOST: root
+#
+#    volumes:
+#
+#      - ./sql:/docker-entrypoint-initdb.d
+#
+#
+#    ports:
+#
+#      - "6033:3306"
+#
+#    healthcheck:
+#
+#      test: "/usr/bin/mysql --user=root --password=urvsql123--execute \"SHOW DATABASES;\""
+#
+#      interval: 2s
+#
+#      timeout: 20s
+#
+#      retries: 10
+#      
+#      
+#      
+#
+#   
+#
+# springboot-introduction-app:
+#
+#    restart: on-failure
+#    
+#    build: ./
+#
+#    expose:
+#
+#      - "9000"
+#
+#    ports:
+#
+#      - 9000:9000
+#
+#    environment:
+#  
+#    
+#      WAIT_HOSTS: mysql:3306
+#
+#    depends_on:
+#
+#      - docker-mysql
+
+
+version: "2.1"
+services:
+  web-service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://vi-db:3306/db
+    networks:
+      - vi-mysql
+    depends_on:
+      vi-db:
+          condition: service_healthy
+
+  vi-db:
+    image: mysql
+    networks:
+      - vi-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=urvsql123
+      - MYSQL_DATABASE=db
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 2
+
+networks:
+  vi-mysql:
