@@ -9,7 +9,7 @@ import com.example.model.Employee;
 
 public interface EmployeeJPARepository extends JpaRepository<Employee, Integer>{
 	
-	List<Employee> findByEmpAddress(String address);
+	List<Employee> findByEmpAddress (String address);
 
 	
 }
